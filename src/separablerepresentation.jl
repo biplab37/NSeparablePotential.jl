@@ -21,6 +21,7 @@ function terms(f::Function,Λ::Float64,n::Int64)
     return red_arg_list(func_list,points)
 end
 
+## Helper functions
 function next_func(func::Function,p0)
     g(x,y) = func(x,y) - func(x,p0)*func(p0,y)/func(p0,p0)
     return g
