@@ -13,7 +13,7 @@ function gap(model::Model,initial_guess)
 
     function gap_eqn!(F,ϕ)
         for i=1:length(ϕ)
-            F[i] = ϕ[i] - (12V/(π^2))*quadgk(q->q^2*f[i](q)*m(q,ϕ)/En(q,ϕ),0,Inf)[1]
+            F[i] = ϕ[i] - (12/(π^2))*quadgk(q->q^2*f[i](q)*m(q,ϕ)/En(q,ϕ),0,Inf)[1]
         end
     end
     sol = nlsolve(gap_eqn!, initial_guess, autodiff=:forward)
