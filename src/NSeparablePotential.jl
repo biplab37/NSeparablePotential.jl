@@ -3,6 +3,7 @@ module NSeparablePotential
 using LinearAlgebra
 using NLsolve
 using RecipesBase
+using QuadGK
 
 include("custom_types.jl")
 include("separablerepresentation.jl")

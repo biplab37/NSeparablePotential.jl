@@ -1,7 +1,8 @@
-@recipe function plot(r::ResultGap)
+@recipe function plot(r::ResultGap;x=0:0.01:2)
     seriestype := :path
     line := 2
-    xlabel -> "T"
-    ylabel -> "massgap"
-    Tlist, massgap = r.Tlist, r.massgap
+    xlabel --> "q [GeV]"
+    ylabel --> "Dynamical Mass [GeV]"
+    label --> ""
+    q,mass = x,r.dynamicmass.(x)
 end

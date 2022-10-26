@@ -1,5 +1,8 @@
 ## Solving gap equation
 function gap(model::Model,initial_guess)
+    if length(initial_guess) != model.n
+        error("Initial guess must be of length model.n = $(model.n)")
+    end
     # extract parameters
     σ, Λ, m0 = model.param.σ, model.param.Λ, model.param.m0
 
@@ -16,9 +19,11 @@ function gap(model::Model,initial_guess)
             F[i] = ϕ[i] - (12/(π^2))*quadgk(q->q^2*f[i](q)*m(q,ϕ)/En(q,ϕ),0,Inf)[1]
         end
     end
-    sol = nlsolve(gap_eqn!, initial_guess, autodiff=:forward)
+    sol = nlsolve(gap_eqn!, initial_guess, autodiff=:forward).zero
 
-    return sol.zero
+    result = ResultGap(massgap = sol,dynamicmass=q->m(q,sol))
+
+    return result
 end
 
 export gap

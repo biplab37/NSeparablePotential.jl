@@ -11,6 +11,9 @@ Base.@kwdef struct Model
 end
 
 Base.@kwdef struct ResultGap
-    Tlist::Vector{Float64}
     massgap::Vector{Float64}
+    # terms::Vector{Function}
+    dynamicmass::Function
 end
+
+export Parameters, Model, ResultGap
