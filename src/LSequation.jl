@@ -5,10 +5,16 @@ function propagator_sigma(P0::Float64)
     return p -> 4p^2 / (4En(p, m)^2 - P0^2)
 end
 
-# Create the matrix Iᵢⱼ
+# Create the matrix Jᵢⱼ= Σₚ gᵢ(p)G(p) gⱼ(p)
 function create_matrix(terms::Array{Function,1}, propagator::Function, Λ::Float64, n::Int64)
     J = zeros(n, n)
     #TODO
+    for i = 1:n
+        for j = 1:i
+            J[i,j] = integrate(p -> terms[i](p) * terms[j](p) * propagator_sigma(p,P0), 0, Inf)
+            J[j,i] = J[i,j]
+        end
+    end
     return J
 end
 
