@@ -8,7 +8,7 @@ using QuadGK
 include("custom_types.jl")
 include("separablerepresentation.jl")
 include("gapeqn.jl")
-include("LDequation.jl")
+include("LSequation.jl")
 include("plot_recipes.jl")
 
 end # module NSeparablePotential

@@ -1,5 +1,5 @@
 ## Solving gap equation
-function gap(model::Model, initial_guess)
+function gap(model::Model, initial_guess::Vector, terms::Vector{Function})
     if length(initial_guess) != model.n
         error("Initial guess must be of length model.n = $(model.n)")
     end
@@ -7,9 +7,6 @@ function gap(model::Model, initial_guess)
     Λ, m0 = model.param.Λ, model.param.m0
 
     n = model.n
-
-    # separable approximation of bivariate function
-    f = terms(model.pot, Λ, n)
 
     m(q, ϕ) = m0 + sum(ϕ .* map.(f, q))
     En(q, ϕ) = sqrt(q^2 + m(q, ϕ)^2)
@@ -25,6 +22,11 @@ function gap(model::Model, initial_guess)
     result = ResultGap(massgap=sol, dynamicmass=q -> m(q, sol))
 
     return result
+end
+
+function gap(model::Model, initial_guess)
+    f = terms(model.pot, Λ, n)
+    gap(model, initial_guess, f)
 end
 
 export gap

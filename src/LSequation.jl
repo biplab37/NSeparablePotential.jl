@@ -1,17 +1,16 @@
 ## Solve the Lippmann-Schwinger equation in separable potential approximation
 
-function propagator_sigma(P0::Float64)
-    #TODO
-    return p -> 4p^2 / (4En(p, m)^2 - P0^2)
+function propagator_sigma(p::Float64, P0::Float64, m::ResultGap)
+    return 4p^2 / (4(p^2 +  m.dynamicmass(p)^2) - P0^2)
 end
 
 # Create the matrix Jᵢⱼ= Σₚ gᵢ(p)G(p) gⱼ(p)
-function create_matrix(terms::Array{Function,1}, propagator::Function, Λ::Float64, n::Int64)
+function create_matrix(model::Model, m::ResultGap, f::Vector{Function}, propagator::Function, P0::Float64)
+    n = model.n
     J = zeros(n, n)
-    #TODO
     for i = 1:n
         for j = 1:i
-            J[i,j] = integrate(p -> terms[i](p) * terms[j](p) * propagator_sigma(p,P0), 0, Inf)
+            J[i,j] = integrate(p -> f[i](p) * f[j](p) * propagator(p, P0, m), 0, Λ)
             J[j,i] = J[i,j]
         end
     end
@@ -19,9 +18,29 @@ function create_matrix(terms::Array{Function,1}, propagator::Function, Λ::Float
 end
 
 ## Solve the Lippmann-Schwinger equation 
-function LS(model::Model, massgap::Vector{Float64})
-    #TODO
-    return nothing
+function LS(model::Model)
+    intial_guess = zeros(model.n)
+    massgap = gap(model, intial_guess)
+    return LS(model, massgap)
+end
+
+function LS(model::Model, massgap::ResultGap)
+    f = terms(model.pot, model.Λ, model.n)
+    return LS(model, massgap, f)
+end
+
+function LS(model::Model, f::Vector{Function})
+    intial_guess = zeros(model.n)
+    massgap = gap(model, initial_guess, terms)
+    return LS(model, massgap, f)
+end
+
+function LS(model::Model, massgap::ResultGap, f::Vector{Function})
+    function denominator(P0)
+        J = create_matrix(model, massgap, f, P0)
+        return denom(J)
+    end
+    return find_zero(denominator, 0, 2)
 end
 
 ## Expression for the denominator of the T matrix in separable approximation calculated Mathematica (sample code in `Symbolics.jl` is also given)
