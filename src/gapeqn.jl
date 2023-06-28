@@ -26,7 +26,13 @@ end
 
 function gap(model::Model, initial_guess)
     f = terms(model.pot, Λ, n)
-    gap(model, initial_guess, f)
+    return gap(model, initial_guess, f)
 end
+
+function gap(model::Model)
+    f = terms(model.pot, Λ, n)
+    return gap(model, zeros(model.n), f)
+end
+
 
 export gap
