@@ -1,16 +1,16 @@
 ## Solve the Lippmann-Schwinger equation in separable potential approximation
 
-function propagator_sigma(p::Float64, P0::Float64, m::ResultGap)
+function propagator_sigma(p::Float64, P0, m::ResultGap)
     return 4p^2 / (4(p^2 +  m.dynamicmass(p)^2) - P0^2)
 end
 
 # Create the matrix Jᵢⱼ= Σₚ gᵢ(p)G(p) gⱼ(p)
-function create_matrix(model::Model, m::ResultGap, f::Vector{Function}, propagator::Function, P0::Float64)
+function create_matrix(model::Model, m::ResultGap, f::Vector, propagator, P0)
     n = model.n
     J = zeros(n, n)
     for i = 1:n
         for j = 1:i
-            J[i,j] = integrate(p -> f[i](p) * f[j](p) * propagator(p, P0, m), 0, Λ)
+            J[i,j] = integrate(p -> f[i](p) * f[j](p) * propagator(p, P0, m), 0, model.param.Λ)
             J[j,i] = J[i,j]
         end
     end
@@ -25,22 +25,23 @@ function LS(model::Model)
 end
 
 function LS(model::Model, massgap::ResultGap)
-    f = terms(model.pot, model.Λ, model.n)
+    f = terms((x,y) -> model.pot(x, y, model.param), model.param.Λ, model.n)
     return LS(model, massgap, f)
 end
 
-function LS(model::Model, f::Vector{Function})
+function LS(model::Model, f::Vector)
     intial_guess = zeros(model.n)
     massgap = gap(model, initial_guess, terms)
     return LS(model, massgap, f)
 end
 
-function LS(model::Model, massgap::ResultGap, f::Vector{Function})
+function LS(model::Model, massgap::ResultGap, f::Vector)
     function denominator(P0)
-        J = create_matrix(model, massgap, f, P0)
+        J = create_matrix(model, massgap, f, propagator_sigma, P0)
         return denom(J)
     end
-    return find_zero(denominator, 0, 2)
+    # return find_zero(denominator, 0, 2)
+    return denominator
 end
 
 ## Expression for the denominator of the T matrix in separable approximation calculated Mathematica (sample code in `Symbolics.jl` is also given)
@@ -80,3 +81,5 @@ end
 function denom5(J)
     return -(((-(J[1, 5] * J[2, 4]) + J[1, 4] * J[2, 5] + J[1, 5] * J[2, 4] * J[3, 3] - J[1, 4] * J[2, 5] * J[3, 3] - J[1, 5] * J[2, 3] * J[3, 4] + J[1, 3] * J[2, 5] * J[3, 4] + J[1, 4] * J[2, 3] * J[3, 5] - J[1, 3] * J[2, 4] * J[3, 5]) * J[4, 2] - (J[1, 5] * J[2, 4] * J[3, 2] - J[1, 4] * J[2, 5] * J[3, 2] + J[1, 5] * J[3, 4] - J[1, 5] * J[2, 2] * J[3, 4] + J[1, 2] * J[2, 5] * J[3, 4] - J[1, 4] * J[3, 5] + J[1, 4] * J[2, 2] * J[3, 5] - J[1, 2] * J[2, 4] * J[3, 5]) * J[4, 3] - (-J[1, 5] + J[1, 5] * J[2, 2] - J[1, 2] * J[2, 5] + J[1, 5] * J[2, 3] * J[3, 2] - J[1, 3] * J[2, 5] * J[3, 2] + J[1, 5] * J[3, 3] - J[1, 5] * J[2, 2] * J[3, 3] + J[1, 2] * J[2, 5] * J[3, 3] - J[1, 3] * J[3, 5] + J[1, 3] * J[2, 2] * J[3, 5] - J[1, 2] * J[2, 3] * J[3, 5]) * (1 - J[4, 4]) - (-J[1, 4] + J[1, 4] * J[2, 2] - J[1, 2] * J[2, 4] + J[1, 4] * J[2, 3] * J[3, 2] - J[1, 3] * J[2, 4] * J[3, 2] + J[1, 4] * J[3, 3] - J[1, 4] * J[2, 2] * J[3, 3] + J[1, 2] * J[2, 4] * J[3, 3] - J[1, 3] * J[3, 4] + J[1, 3] * J[2, 2] * J[3, 4] - J[1, 2] * J[2, 3] * J[3, 4]) * J[4, 5]) * J[5, 1]) + ((-(J[1, 5] * J[2, 4]) + J[1, 4] * J[2, 5] + J[1, 5] * J[2, 4] * J[3, 3] - J[1, 4] * J[2, 5] * J[3, 3] - J[1, 5] * J[2, 3] * J[3, 4] + J[1, 3] * J[2, 5] * J[3, 4] + J[1, 4] * J[2, 3] * J[3, 5] - J[1, 3] * J[2, 4] * J[3, 5]) * J[4, 1] - (J[1, 5] * J[2, 4] * J[3, 1] - J[1, 4] * J[2, 5] * J[3, 1] - J[1, 5] * J[2, 1] * J[3, 4] - J[2, 5] * J[3, 4] + J[1, 1] * J[2, 5] * J[3, 4] + J[1, 4] * J[2, 1] * J[3, 5] + J[2, 4] * J[3, 5] - J[1, 1] * J[2, 4] * J[3, 5]) * J[4, 3] - (J[1, 5] * J[2, 1] + J[2, 5] - J[1, 1] * J[2, 5] + J[1, 5] * J[2, 3] * J[3, 1] - J[1, 3] * J[2, 5] * J[3, 1] - J[1, 5] * J[2, 1] * J[3, 3] - J[2, 5] * J[3, 3] + J[1, 1] * J[2, 5] * J[3, 3] + J[1, 3] * J[2, 1] * J[3, 5] + J[2, 3] * J[3, 5] - J[1, 1] * J[2, 3] * J[3, 5]) * (1 - J[4, 4]) - (J[1, 4] * J[2, 1] + J[2, 4] - J[1, 1] * J[2, 4] + J[1, 4] * J[2, 3] * J[3, 1] - J[1, 3] * J[2, 4] * J[3, 1] - J[1, 4] * J[2, 1] * J[3, 3] - J[2, 4] * J[3, 3] + J[1, 1] * J[2, 4] * J[3, 3] + J[1, 3] * J[2, 1] * J[3, 4] + J[2, 3] * J[3, 4] - J[1, 1] * J[2, 3] * J[3, 4]) * J[4, 5]) * J[5, 2] - ((J[1, 5] * J[2, 4] * J[3, 2] - J[1, 4] * J[2, 5] * J[3, 2] + J[1, 5] * J[3, 4] - J[1, 5] * J[2, 2] * J[3, 4] + J[1, 2] * J[2, 5] * J[3, 4] - J[1, 4] * J[3, 5] + J[1, 4] * J[2, 2] * J[3, 5] - J[1, 2] * J[2, 4] * J[3, 5]) * J[4, 1] - (J[1, 5] * J[2, 4] * J[3, 1] - J[1, 4] * J[2, 5] * J[3, 1] - J[1, 5] * J[2, 1] * J[3, 4] - J[2, 5] * J[3, 4] + J[1, 1] * J[2, 5] * J[3, 4] + J[1, 4] * J[2, 1] * J[3, 5] + J[2, 4] * J[3, 5] - J[1, 1] * J[2, 4] * J[3, 5]) * J[4, 2] - (-(J[1, 5] * J[3, 1]) + J[1, 5] * J[2, 2] * J[3, 1] - J[1, 2] * J[2, 5] * J[3, 1] - J[1, 5] * J[2, 1] * J[3, 2] - J[2, 5] * J[3, 2] + J[1, 1] * J[2, 5] * J[3, 2] - J[3, 5] + J[1, 1] * J[3, 5] + J[1, 2] * J[2, 1] * J[3, 5] + J[2, 2] * J[3, 5] - J[1, 1] * J[2, 2] * J[3, 5]) * (1 - J[4, 4]) - (-(J[1, 4] * J[3, 1]) + J[1, 4] * J[2, 2] * J[3, 1] - J[1, 2] * J[2, 4] * J[3, 1] - J[1, 4] * J[2, 1] * J[3, 2] - J[2, 4] * J[3, 2] + J[1, 1] * J[2, 4] * J[3, 2] - J[3, 4] + J[1, 1] * J[3, 4] + J[1, 2] * J[2, 1] * J[3, 4] + J[2, 2] * J[3, 4] - J[1, 1] * J[2, 2] * J[3, 4]) * J[4, 5]) * J[5, 3] + (-(J[1, 5] * J[4, 1]) + J[1, 5] * J[2, 2] * J[4, 1] - J[1, 2] * J[2, 5] * J[4, 1] + J[1, 5] * J[2, 3] * J[3, 2] * J[4, 1] - J[1, 3] * J[2, 5] * J[3, 2] * J[4, 1] + J[1, 5] * J[3, 3] * J[4, 1] - J[1, 5] * J[2, 2] * J[3, 3] * J[4, 1] + J[1, 2] * J[2, 5] * J[3, 3] * J[4, 1] - J[1, 3] * J[3, 5] * J[4, 1] + J[1, 3] * J[2, 2] * J[3, 5] * J[4, 1] - J[1, 2] * J[2, 3] * J[3, 5] * J[4, 1] - J[1, 5] * J[2, 1] * J[4, 2] - J[2, 5] * J[4, 2] + J[1, 1] * J[2, 5] * J[4, 2] - J[1, 5] * J[2, 3] * J[3, 1] * J[4, 2] + J[1, 3] * J[2, 5] * J[3, 1] * J[4, 2] + J[1, 5] * J[2, 1] * J[3, 3] * J[4, 2] + J[2, 5] * J[3, 3] * J[4, 2] - J[1, 1] * J[2, 5] * J[3, 3] * J[4, 2] - J[1, 3] * J[2, 1] * J[3, 5] * J[4, 2] - J[2, 3] * J[3, 5] * J[4, 2] + J[1, 1] * J[2, 3] * J[3, 5] * J[4, 2] - J[1, 5] * J[3, 1] * J[4, 3] + J[1, 5] * J[2, 2] * J[3, 1] * J[4, 3] - J[1, 2] * J[2, 5] * J[3, 1] * J[4, 3] - J[1, 5] * J[2, 1] * J[3, 2] * J[4, 3] - J[2, 5] * J[3, 2] * J[4, 3] + J[1, 1] * J[2, 5] * J[3, 2] * J[4, 3] - J[3, 5] * J[4, 3] + J[1, 1] * J[3, 5] * J[4, 3] + J[1, 2] * J[2, 1] * J[3, 5] * J[4, 3] + J[2, 2] * J[3, 5] * J[4, 3] - J[1, 1] * J[2, 2] * J[3, 5] * J[4, 3] - J[4, 5] + J[1, 1] * J[4, 5] + J[1, 2] * J[2, 1] * J[4, 5] + J[2, 2] * J[4, 5] - J[1, 1] * J[2, 2] * J[4, 5] + J[1, 3] * J[3, 1] * J[4, 5] - J[1, 3] * J[2, 2] * J[3, 1] * J[4, 5] + J[1, 2] * J[2, 3] * J[3, 1] * J[4, 5] + J[1, 3] * J[2, 1] * J[3, 2] * J[4, 5] + J[2, 3] * J[3, 2] * J[4, 5] - J[1, 1] * J[2, 3] * J[3, 2] * J[4, 5] + J[3, 3] * J[4, 5] - J[1, 1] * J[3, 3] * J[4, 5] - J[1, 2] * J[2, 1] * J[3, 3] * J[4, 5] - J[2, 2] * J[3, 3] * J[4, 5] + J[1, 1] * J[2, 2] * J[3, 3] * J[4, 5]) * J[5, 4] + ((-J[1, 4] + J[1, 4] * J[2, 2] - J[1, 2] * J[2, 4] + J[1, 4] * J[2, 3] * J[3, 2] - J[1, 3] * J[2, 4] * J[3, 2] + J[1, 4] * J[3, 3] - J[1, 4] * J[2, 2] * J[3, 3] + J[1, 2] * J[2, 4] * J[3, 3] - J[1, 3] * J[3, 4] + J[1, 3] * J[2, 2] * J[3, 4] - J[1, 2] * J[2, 3] * J[3, 4]) * J[4, 1] - (J[1, 4] * J[2, 1] + J[2, 4] - J[1, 1] * J[2, 4] + J[1, 4] * J[2, 3] * J[3, 1] - J[1, 3] * J[2, 4] * J[3, 1] - J[1, 4] * J[2, 1] * J[3, 3] - J[2, 4] * J[3, 3] + J[1, 1] * J[2, 4] * J[3, 3] + J[1, 3] * J[2, 1] * J[3, 4] + J[2, 3] * J[3, 4] - J[1, 1] * J[2, 3] * J[3, 4]) * J[4, 2] + (-(J[1, 4] * J[3, 1]) + J[1, 4] * J[2, 2] * J[3, 1] - J[1, 2] * J[2, 4] * J[3, 1] - J[1, 4] * J[2, 1] * J[3, 2] - J[2, 4] * J[3, 2] + J[1, 1] * J[2, 4] * J[3, 2] - J[3, 4] + J[1, 1] * J[3, 4] + J[1, 2] * J[2, 1] * J[3, 4] + J[2, 2] * J[3, 4] - J[1, 1] * J[2, 2] * J[3, 4]) * J[4, 3] + (-((J[1, 3] - J[1, 3] * J[2, 2] + J[1, 2] * J[2, 3]) * J[3, 1]) + (-(J[1, 3] * J[2, 1]) - J[2, 3] + J[1, 1] * J[2, 3]) * J[3, 2] + (1 - J[1, 1] - J[1, 2] * J[2, 1] - J[2, 2] + J[1, 1] * J[2, 2]) * (1 - J[3, 3])) * (1 - J[4, 4])) * (1 - J[5, 5])
 end
+
+export LS

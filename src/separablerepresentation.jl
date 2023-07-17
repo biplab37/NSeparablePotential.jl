@@ -28,6 +28,7 @@ function next_func(func::Function, p0)
 end
 
 function red_arg(f::Function, point::Float64)
+    fx = f(point, point)
     return x -> f(x, point) / sqrt(f(point, point))
 end
 

@@ -1,5 +1,5 @@
 ## Solving gap equation
-function gap(model::Model, initial_guess::Vector, terms::Vector{Function})
+function gap(model::Model, initial_guess::Vector{Float64}, f::Vector)
     if length(initial_guess) != model.n
         error("Initial guess must be of length model.n = $(model.n)")
     end
@@ -25,12 +25,12 @@ function gap(model::Model, initial_guess::Vector, terms::Vector{Function})
 end
 
 function gap(model::Model, initial_guess)
-    f = terms(model.pot, Λ, n)
+    f = terms((x, y)->model.pot(x, y, model.param), model.param.Λ, model.n)
     return gap(model, initial_guess, f)
 end
 
 function gap(model::Model)
-    f = terms(model.pot, Λ, n)
+    f = terms((x, y) -> model.pot(x, y, model.param), model.param.Λ, model.n)
     return gap(model, zeros(model.n), f)
 end
 
