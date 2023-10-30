@@ -11,6 +11,15 @@ f(p,p') = ∑ᵢ gᵢ(p)gᵢ(p') where gᵢ are the terms returned by this funct
 """
 function terms(f::Function, Λ::Float64, n::Int64)
     points = collect(range(0, Λ, length=n))
+    return terms(f, points, n)
+end
+
+function terms(f::Function, points)
+    n = length(points)
+    return terms(f, points, n)
+end
+
+function terms(f::Function, points, n::Int64)
     func_list = []
     cur_F(x, y) = f(x, y)
     push!(func_list, cur_F)
@@ -19,6 +28,16 @@ function terms(f::Function, Λ::Float64, n::Int64)
         push!(func_list, cur_F)
     end
     return red_arg_list(func_list, points)
+end
+
+# TODO: generate the points via optimisation problem.
+function terms(f::Function, n::Int64; box=[0])
+    f_list = Vector{Function}(undef, n)
+    cur_f = f
+    for i in 1:n
+        point = find_max(f, box)
+    end
+    return f_list
 end
 
 ## Helper functions

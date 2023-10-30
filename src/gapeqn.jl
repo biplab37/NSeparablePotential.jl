@@ -25,7 +25,7 @@ function gap(model::Model, initial_guess::Vector{Float64}, f::Vector)
 end
 
 function gap(model::Model, initial_guess)
-    f = terms((x, y)->model.pot(x, y, model.param), model.param.Λ, model.n)
+    f = terms((x, y) -> model.pot(x, y, model.param), model.param.Λ, model.n)
     return gap(model, initial_guess, f)
 end
 
@@ -33,6 +33,5 @@ function gap(model::Model)
     f = terms((x, y) -> model.pot(x, y, model.param), model.param.Λ, model.n)
     return gap(model, zeros(model.n), f)
 end
-
 
 export gap
