@@ -1,7 +1,7 @@
 using Symbolics
 using LinearAlgebra
 
-n = 4
+n = 2
 
 @variables g[1:n] J[1:n, 1:n] A[1:n]
 

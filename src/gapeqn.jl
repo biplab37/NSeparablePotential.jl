@@ -17,7 +17,7 @@ function gap(model::Model, initial_guess::Vector{Float64}, f::Vector)
         end
     end
 
-    sol = nlsolve(gap_eqn!, initial_guess, autodiff=:forward).zero
+    sol = nlsolve(gap_eqn!, initial_guess, autodiff=:forward, iterations=1000).zero
 
     result = ResultGap(massgap=sol, dynamicmass=q -> m(q, sol))
 
@@ -32,6 +32,11 @@ end
 function gap(model::Model)
     f = terms((x, y) -> model.pot(x, y, model.param), model.param.Λ, model.n)
     return gap(model, zeros(model.n), f)
+end
+
+function scale_pot(scale::Float64, model::Model, initial_guess::Vector{Float64})
+    new_model = Model(model.param, (x, y) -> model.pot(x, y, model.param) * scale)
+    return gap(new_model, initial_guess)
 end
 
 export gap

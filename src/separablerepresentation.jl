@@ -31,13 +31,34 @@ function terms(f::Function, points, n::Int64)
 end
 
 # TODO: generate the points via optimisation problem.
-function terms(f::Function, n::Int64; box=[0])
-    f_list = Vector{Function}(undef, n)
+function terms_full(f::Function, n::Int64; linerange=[0, 1])
+    f_list = []
     cur_f = f
-    for i in 1:n
-        point = find_max(f, box)
+    for _ in 1:n
+        point = golden_search_maxima(x -> abs(cur_f(x, x)), linerange...)
+        push!(f_list, (cur_f, point))
+        cur_f = next_func(cur_f, point)
     end
     return f_list
+end
+
+function terms(f::Function, n::Int64; linerange=[0, 1])
+    f_list = terms_full(f, n, linerange=linerange)
+    return [red_arg(f_list[i][1], f_list[i][2]) for i in 1:n]
+end
+
+function approx_func(f::Function, n::Int64; linerange=[0, 1])
+    f_list = terms_full(f, n, linerange=linerange)
+    function g(x, y)
+        result = 0.0
+        for i in 1:n
+            func = f_list[i][1]
+            point = f_list[i][2]
+            result += func(x, point) * func(point, y) / func(point, point)
+        end
+        return result
+    end
+    return g
 end
 
 ## Helper functions
@@ -46,9 +67,15 @@ function next_func(func::Function, p0)
     return g
 end
 
-function red_arg(f::Function, point::Float64)
-    fx = f(point, point)
-    return x -> f(x, point) / sqrt(f(point, point))
+function red_arg(func::Function, point::Float64)
+    fx = func(point, point)
+    if fx > 0
+        return (f=x -> func(x, point) / sqrt(fx), sign=1)
+    elseif fx < 0
+        return (f=x -> func(x, point) / sqrt(-fx), sign=-1)
+    else
+        return (f=x -> func(x, point), sign=0)
+    end
 end
 
 function red_arg_list(f_list, points)
