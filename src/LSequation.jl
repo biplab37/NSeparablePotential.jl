@@ -1,23 +1,23 @@
 ## Solve the Lippmann-Schwinger equation in separable potential approximation
 
 function propagator_sigma(p::Float64, P0, m::ResultGap)
-    return 4p^2 / (4(p^2 +  m.dynamicmass(p)^2) - P0^2)
+    return 4p^2 / (4(p^2 + m.dynamicmass(p)^2) - P0^2)
 end
 
-# Create the matrix Jᵢⱼ= Σₚ gᵢ(p)G(p) gⱼ(p)
+# Create the matrix Jᵢⱼ= Σₚ ξⱼ gᵢ(p)G(p) gⱼ(p)
 function create_matrix(model::Model, m::ResultGap, f::Vector, propagator, P0)
     n = model.n
     J = zeros(n, n)
     for i = 1:n
         for j = 1:i
-            J[i,j] = integrate(p -> f[i](p) * f[j](p) * propagator(p, P0, m), 0, model.param.Λ)
-            J[j,i] = J[i,j]
+            J[i, j] = integrate(p -> f[i](p) * f[j](p) * propagator(p, P0, m), 0, model.param.Λ)
+            J[j, i] = J[i, j]
         end
     end
     return J
 end
 
-## Solve the Lippmann-Schwinger equation 
+## Solve the Lippmann-Schwinger equation
 function LS(model::Model)
     intial_guess = zeros(model.n)
     massgap = gap(model, intial_guess)
@@ -25,7 +25,7 @@ function LS(model::Model)
 end
 
 function LS(model::Model, massgap::ResultGap)
-    f = terms((x,y) -> model.pot(x, y, model.param), model.param.Λ, model.n)
+    f = terms((x, y) -> model.pot(x, y, model.param), model.param.Λ, model.n)
     return LS(model, massgap, f)
 end
 

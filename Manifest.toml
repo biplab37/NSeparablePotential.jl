@@ -1,8 +1,8 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.11.1"
+julia_version = "1.11.6"
 manifest_format = "2.0"
-project_hash = "9a97b0f26ecdb98bc8e2f4c5236e55b7e96a9747"
+project_hash = "0ede973848e84a476e8eca7a1bdbde68123dfd4f"
 
 [[deps.Adapt]]
 deps = ["LinearAlgebra", "Requires"]
@@ -314,7 +314,7 @@ version = "0.3.27+1"
 [[deps.OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
-version = "0.8.1+2"
+version = "0.8.5+0"
 
 [[deps.OpenSpecFun_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Pkg"]
@@ -458,6 +458,11 @@ deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
 version = "1.10.0"
 
+[[deps.Test]]
+deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
+uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+version = "1.11.0"
+
 [[deps.UUIDs]]
 deps = ["Random", "SHA"]
 uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
@@ -471,6 +476,14 @@ version = "1.0.2"
 [[deps.Unicode]]
 uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 version = "1.11.0"
+
+[[deps.UsefulFunctions]]
+deps = ["LinearAlgebra", "Test"]
+git-tree-sha1 = "58df4dd9da71e9bf082e2bc9ddde13e393b0fe78"
+repo-rev = "main"
+repo-url = "https://github.com/biplab37/UsefulFunctions.jl.git"
+uuid = "3faa5a7b-8411-4986-9283-d50561d89da5"
+version = "0.1.0"
 
 [[deps.Zlib_jll]]
 deps = ["Libdl"]
